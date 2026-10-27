@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center">
+<div class="col-md-6">
+    <div class="card shadow p-4">
+        <h3 class="mb-4">🚨 إبلاغ عن إعلان</h3>
+        <p>الإعلان: <strong>{{ property.title }}</strong></p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">سبب الإبلاغ</label>
+                <textarea name="reason" class="form-control" rows="4" required></textarea>
+            </div>
+            <button class="btn btn-danger w-100">إرسال البلاغ</button>
+            <a href="{% url 'detail' property.pk %}" class="btn btn-secondary w-100 mt-2">إلغاء</a>
+        </form>
+    </div>
+</div>
+</div>
+
+{% endblock %}

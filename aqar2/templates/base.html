@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}عقاري{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <i class="bi bi-buildings-fill"></i> عقا<span>ري</span>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-1">
+        <li class="nav-item"><a class="nav-link" href="{% url 'search' %}"><i class="bi bi-search"></i> بحث</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'newest' %}"><i class="bi bi-stars"></i> الأحدث</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'popular' %}"><i class="bi bi-fire"></i> الأكثر مشاهدة</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'cities' %}"><i class="bi bi-geo-alt-fill"></i> المحافظات</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'stats' %}"><i class="bi bi-bar-chart-fill"></i> إحصائيات</a></li>
+      </ul>
+
+      <ul class="navbar-nav gap-2 align-items-center">
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link nav-notif-bell" href="{% url 'notifications' %}" title="التنبيهات">
+              <i class="bi bi-bell-fill"></i>
+              {% if user.notifications.filter.is_read == False %}
+              {% endif %}
+            </a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'favorites' %}"><i class="bi bi-heart-fill" style="color:var(--primary);"></i> المفضلة</a></li>
+
+          <!-- قائمة منسدلة لكل أدوات الحساب -->
+          <li class="nav-item dropdown">
+            <a class="nav-link nav-btn-outline dropdown-toggle" href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i> {{ user.username }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-aqari" aria-labelledby="userMenu">
+              <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> الملف الشخصي</a></li>
+              <li><a class="dropdown-item" href="{% url 'notifications' %}"><i class="bi bi-bell"></i> التنبيهات</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_searches' %}"><i class="bi bi-bookmark"></i> البحث المحفوظ</a></li>
+              <li><a class="dropdown-item" href="{% url 'recently_viewed' %}"><i class="bi bi-clock-history"></i> مشاهَدة مؤخراً</a></li>
+              <li><a class="dropdown-item" href="{% url 'history' %}"><i class="bi bi-journal-text"></i> سجل النشاط</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'my_following' %}"><i class="bi bi-arrow-right-circle"></i> من أتابع</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_followers' %}"><i class="bi bi-people"></i> المتابعون</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'export' %}"><i class="bi bi-download"></i> تصدير عقاراتي</a></li>
+              <li><form method="post" action="{% url 'logout' %}" class="d-inline">{% csrf_token %}<button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i> تسجيل الخروج</button></form></li>
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link nav-btn-primary" href="{% url 'add' %}"><i class="bi bi-plus-circle-fill"></i> إضافة عقار</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link nav-btn-outline" href="{% url 'login' %}">دخول</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn-primary" href="{% url 'signup' %}">تسجيل</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<style>
+.nav-notif-bell{position:relative;padding:8px 12px !important;font-size:1.1rem}
+.nav-notif-bell:hover{color:#C9A84C !important}
+.dropdown-aqari{background:#1A1F2B;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.dropdown-aqari .dropdown-item{color:#E8E8EC;padding:8px 14px;border-radius:8px;font-size:0.9rem}
+.dropdown-aqari .dropdown-item:hover{background:rgba(201,168,76,0.1);color:#C9A84C}
+.dropdown-aqari .dropdown-divider{border-color:rgba(255,255,255,0.06);margin:6px 0}
+.dropdown-aqari .text-danger{color:#FF5A5F !important}
+.dropdown-aqari .text-danger:hover{background:rgba(255,90,95,0.1)}
+.dropdown-aqari button.dropdown-item{background:transparent;border:none;width:100%;text-align:right}
+</style>
+
+{% if messages %}
+<div class="container mt-3">
+  {% for message in messages %}
+  <div class="alert-custom"><i class="bi bi-check-circle-fill"></i> {{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="footer-brand"><i class="bi bi-buildings-fill"></i> عقاري</div>
+        <p style="color:rgba(255,255,255,0.5); font-size:0.88rem; line-height:1.8;">
+          منصة عقارية متكاملة للبيع والإيجار في الجمهورية العربية السورية
+        </p>
+      </div>
+      <div class="col-md-2 mb-4">
+        <h6>استكشف</h6>
+        <a href="{% url 'home' %}">الرئيسية</a>
+        <a href="{% url 'search' %}">بحث عقارات</a>
+        <a href="{% url 'cities' %}">المحافظات</a>
+        <a href="{% url 'newest' %}">الأحدث</a>
+      </div>
+      <div class="col-md-2 mb-4">
+        <h6>حسابي</h6>
+        {% if user.is_authenticated %}
+          <a href="{% url 'profile' %}">الملف الشخصي</a>
+          <a href="{% url 'favorites' %}">المفضلة</a>
+          <a href="{% url 'add' %}">إضافة عقار</a>
+          <a href="{% url 'logout' %}">تسجيل خروج</a>
+        {% else %}
+          <a href="{% url 'login' %}">تسجيل الدخول</a>
+          <a href="{% url 'signup' %}">إنشاء حساب</a>
+        {% endif %}
+      </div>
+      <div class="col-md-4 mb-4">
+        <h6>أنواع العقارات</h6>
+        <div class="row">
+          <div class="col-6">
+            <a href="{% url 'search' %}?type=apartment"><i class="bi bi-building"></i> شقق</a>
+            <a href="{% url 'search' %}?type=villa"><i class="bi bi-house-heart-fill"></i> فلل</a>
+            <a href="{% url 'search' %}?type=land"><i class="bi bi-tree-fill"></i> أراضي</a>
+          </div>
+          <div class="col-6">
+            <a href="{% url 'search' %}?type=office"><i class="bi bi-briefcase-fill"></i> مكاتب</a>
+            <a href="{% url 'search' %}?status=sale"><i class="bi bi-tag-fill"></i> للبيع</a>
+            <a href="{% url 'search' %}?status=rent"><i class="bi bi-key-fill"></i> للإيجار</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 عقاري — جميع الحقوق محفوظة | الجمهورية العربية السورية</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

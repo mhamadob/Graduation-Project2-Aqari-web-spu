@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}سجل النشاط — عقار{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <h2 class="page-title mb-4">📜 سجل النشاط</h2>
+
+  <ul class="nav nav-tabs hist-tabs mb-4" id="histTab">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-props">🏠 عقاراتي ({{ properties|length }})</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-favs">❤️ المفضلة ({{ favorites|length }})</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rates">⭐ تقييماتي ({{ ratings|length }})</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <!-- عقاراتي -->
+    <div class="tab-pane fade show active" id="tab-props">
+      {% for p in properties %}
+      <div class="hist-row">
+        <div class="hist-icon">🏠</div>
+        <div class="hist-body">
+          <a href="{% url 'detail' p.pk %}" class="hist-title">{{ p.title }}</a>
+          <div class="hist-meta">{{ p.city }} · {{ p.price|floatformat:0 }} ل.س · أُضيف {{ p.created_at|timesince }} مضت</div>
+        </div>
+        <div class="hist-stats">👁 {{ p.views_count }} · ⭐ {{ p.avg_rating }}</div>
+      </div>
+      {% empty %}
+      <p class="text-muted text-center py-4">— لم تضف عقاراً بعد —</p>
+      {% endfor %}
+    </div>
+
+    <!-- المفضلة -->
+    <div class="tab-pane fade" id="tab-favs">
+      {% for f in favorites %}
+      <div class="hist-row">
+        <div class="hist-icon">❤️</div>
+        <div class="hist-body">
+          <a href="{% url 'detail' f.property.pk %}" class="hist-title">{{ f.property.title }}</a>
+          <div class="hist-meta">{{ f.property.city }} · أضفته {{ f.added_at|timesince }} مضت</div>
+        </div>
+        <a href="{% url 'fav_remove' f.property.pk %}" class="btn btn-sm btn-outline-danger">إزالة</a>
+      </div>
+      {% empty %}
+      <p class="text-muted text-center py-4">— المفضلة فارغة —</p>
+      {% endfor %}
+    </div>
+
+    <!-- التقييمات -->
+    <div class="tab-pane fade" id="tab-rates">
+      {% for r in ratings %}
+      <div class="hist-row">
+        <div class="hist-icon">⭐</div>
+        <div class="hist-body">
+          <a href="{% url 'detail' r.property.pk %}" class="hist-title">{{ r.property.title }}</a>
+          <div class="hist-meta">قيّمته بـ {{ r.score }}/5 منذ {{ r.created_at|timesince }}</div>
+        </div>
+        <div class="hist-stats">{{ r.score }}/5 ⭐</div>
+      </div>
+      {% empty %}
+      <p class="text-muted text-center py-4">— لم تقيّم أي عقار بعد —</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+.page-title{color:#C9A84C;font-weight:800}
+.hist-tabs{border-bottom:1px solid rgba(255,255,255,0.06)}
+.hist-tabs .nav-link{background:transparent;border:none;color:#8A8A96;font-weight:600;padding:10px 16px}
+.hist-tabs .nav-link.active{color:#C9A84C;background:rgba(201,168,76,0.1);border-radius:8px 8px 0 0}
+.hist-row{display:flex;align-items:center;gap:14px;padding:14px 18px;background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px;color:#E8E8EC}
+.hist-icon{font-size:1.6rem}
+.hist-body{flex:1;min-width:0}
+.hist-title{color:#C9A84C;font-weight:700;text-decoration:none;display:block}
+.hist-title:hover{color:#E8C96A}
+.hist-meta{color:#8A8A96;font-size:0.8rem;margin-top:2px}
+.hist-stats{color:#C0C0CC;font-size:0.85rem;font-weight:600}
+</style>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}المفضلة{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+
+  <div class="mb-4">
+    <h2 style="font-weight:800;">❤️ المفضلة</h2>
+    <p style="color:var(--gray);">{{ favorites.count }} عقار محفوظ</p>
+  </div>
+
+  <div class="row g-4">
+    {% for fav in favorites %}
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <div class="property-card">
+        <div class="card-img-wrap">
+          {% if fav.property.image %}
+            <img src="{{ fav.property.image.url }}" alt="{{ fav.property.title }}">
+          {% else %}
+            <div class="no-image">🏠</div>
+          {% endif %}
+          <span class="status-badge">{{ fav.property.get_status_display }}</span>
+          <a href="{% url 'fav_remove' fav.property.pk %}" class="fav-btn">❤️</a>
+        </div>
+        <a href="{% url 'detail' fav.property.pk %}">
+          <div class="card-info">
+            <p class="prop-title">{{ fav.property.title }}</p>
+            <p class="prop-city">📍 {{ fav.property.city }}</p>
+            <p class="prop-details">🛏 {{ fav.property.rooms }} غرف · 📐 {{ fav.property.area }} م²</p>
+            <p class="prop-price">
+              {{ fav.property.price|floatformat:0 }} ل.س
+              <span>/ {{ fav.property.get_status_display }}</span>
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="empty-state">
+        <div class="empty-icon">🤍</div>
+        <h4>لا توجد عقارات في المفضلة</h4>
+        <p>تصفح العقارات وأضف ما يعجبك</p>
+        <a href="/" class="btn-primary-custom mt-4"
+          style="display:inline-block; width:auto; padding:14px 40px;">
+          تصفح العقارات
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

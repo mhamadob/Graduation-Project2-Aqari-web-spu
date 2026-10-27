@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}العقارات حسب المدينة{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+
+  <div class="mb-5 text-center">
+    <h2 style="font-weight:800;">🗺️ العقارات حسب المدينة</h2>
+    <p style="color:var(--gray);">اختر مدينتك وابدأ البحث</p>
+  </div>
+
+  <div class="row g-3">
+    {% for city in cities %}
+    <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+      <a href="{% url 'search' %}?city={{ city.city }}" class="city-card">
+        <div class="city-icon">🏙️</div>
+        <div class="city-name">{{ city.city }}</div>
+        <div class="city-count">{{ city.count }} عقار</div>
+      </a>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="empty-state">
+        <div class="empty-icon">🗺️</div>
+        <h4>لا توجد بيانات بعد</h4>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

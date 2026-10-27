@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center">
+<div class="col-md-6">
+    <div class="card shadow p-4">
+        <h3 class="mb-4">✏️ تعديل الحساب</h3>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label fw-bold">{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button class="btn btn-warning w-100">💾 حفظ</button>
+            <a href="{% url 'profile' %}" class="btn btn-secondary w-100 mt-2">إلغاء</a>
+        </form>
+    </div>
+</div>
+</div>
+
+{% endblock %}

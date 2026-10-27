@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block title %}البحث المتقدم — عقار{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <h2 class="page-title mb-4">🔍 البحث المتقدم</h2>
+
+  <!-- ══════ نموذج البحث الشامل ══════ -->
+  <div class="search-card mb-4">
+    <form method="get" class="row g-3">
+      <!-- بحث نصي - FR-20 -->
+      <div class="col-md-6">
+        <label class="form-label">🔤 كلمة البحث</label>
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="عنوان أو وصف...">
+      </div>
+
+      <!-- المحافظة - FR-21 -->
+      <div class="col-md-3">
+        <label class="form-label">📍 المحافظة</label>
+        <select name="city" class="form-select">
+          <option value="">— كل المحافظات الـ 14 —</option>
+          <option value="دمشق" {% if city == 'دمشق' %}selected{% endif %}>دمشق</option>
+          <option value="ريف دمشق" {% if city == 'ريف دمشق' %}selected{% endif %}>ريف دمشق</option>
+          <option value="حلب" {% if city == 'حلب' %}selected{% endif %}>حلب</option>
+          <option value="حمص" {% if city == 'حمص' %}selected{% endif %}>حمص</option>
+          <option value="حماة" {% if city == 'حماة' %}selected{% endif %}>حماة</option>
+          <option value="اللاذقية" {% if city == 'اللاذقية' %}selected{% endif %}>اللاذقية</option>
+          <option value="طرطوس" {% if city == 'طرطوس' %}selected{% endif %}>طرطوس</option>
+          <option value="إدلب" {% if city == 'إدلب' %}selected{% endif %}>إدلب</option>
+          <option value="درعا" {% if city == 'درعا' %}selected{% endif %}>درعا</option>
+          <option value="السويداء" {% if city == 'السويداء' %}selected{% endif %}>السويداء</option>
+          <option value="القنيطرة" {% if city == 'القنيطرة' %}selected{% endif %}>القنيطرة</option>
+          <option value="دير الزور" {% if city == 'دير الزور' %}selected{% endif %}>دير الزور</option>
+          <option value="الحسكة" {% if city == 'الحسكة' %}selected{% endif %}>الحسكة</option>
+          <option value="الرقة" {% if city == 'الرقة' %}selected{% endif %}>الرقة</option>
+        </select>
+      </div>
+
+      <!-- النوع - FR-22 -->
+      <div class="col-md-3">
+        <label class="form-label">🏘️ نوع العقار</label>
+        <select name="type" class="form-select">
+          <option value="">— الكل —</option>
+          <option value="apartment" {% if type_ == 'apartment' %}selected{% endif %}>شقة</option>
+          <option value="villa" {% if type_ == 'villa' %}selected{% endif %}>فيلا</option>
+          <option value="land" {% if type_ == 'land' %}selected{% endif %}>أرض</option>
+          <option value="office" {% if type_ == 'office' %}selected{% endif %}>مكتب</option>
+          <option value="shop" {% if type_ == 'shop' %}selected{% endif %}>محل تجاري</option>
+          <option value="building" {% if type_ == 'building' %}selected{% endif %}>عمارة</option>
+        </select>
+      </div>
+
+      <!-- الحالة - FR-23 -->
+      <div class="col-md-3">
+        <label class="form-label">🏷️ الحالة</label>
+        <select name="status" class="form-select">
+          <option value="">— الكل —</option>
+          <option value="sale" {% if status == 'sale' %}selected{% endif %}>للبيع</option>
+          <option value="rent" {% if status == 'rent' %}selected{% endif %}>للإيجار</option>
+        </select>
+      </div>
+
+      <!-- السعر - FR-24 -->
+      <div class="col-md-3">
+        <label class="form-label">💰 السعر (ل.س)</label>
+        <div class="d-flex gap-1">
+          <input type="number" name="min_price" value="{{ min_price }}" class="form-control" placeholder="من">
+          <input type="number" name="max_price" value="{{ max_price }}" class="form-control" placeholder="إلى">
+        </div>
+      </div>
+
+      <!-- الغرف - FR-25 -->
+      <div class="col-md-3">
+        <label class="form-label">🛏️ عدد الغرف</label>
+        <select name="rooms" class="form-select">
+          <option value="">— الكل —</option>
+          {% for r in "12345" %}
+          <option value="{{ r }}" {% if rooms == r %}selected{% endif %}>{{ r }} غرف</option>
+          {% endfor %}
+          <option value="6" {% if rooms == "6" %}selected{% endif %}>6+ غرف</option>
+        </select>
+      </div>
+
+      <!-- المساحة - FR-26 -->
+      <div class="col-md-3">
+        <label class="form-label">📐 المساحة (م²)</label>
+        <div class="d-flex gap-1">
+          <input type="number" name="min_area" value="{{ min_area }}" class="form-control" placeholder="من">
+          <input type="number" name="max_area" value="{{ max_area }}" class="form-control" placeholder="إلى">
+        </div>
+      </div>
+
+      <!-- صورة - FR-27 -->
+      <div class="col-md-3">
+        <label class="form-label">📷 الصور</label>
+        <select name="has_image" class="form-select">
+          <option value="">— الكل —</option>
+          <option value="yes" {% if has_image == 'yes' %}selected{% endif %}>بصورة فقط</option>
+        </select>
+      </div>
+
+      <!-- ترتيب - FR-28 -->
+      <div class="col-md-4">
+        <label class="form-label">↕️ الترتيب</label>
+        <select name="sort" class="form-select">
+          <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>الأحدث أولاً</option>
+          <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>الأقدم أولاً</option>
+          <option value="price" {% if sort == 'price' %}selected{% endif %}>السعر تصاعدياً</option>
+          <option value="-price" {% if sort == '-price' %}selected{% endif %}>السعر تنازلياً</option>
+          <option value="-area" {% if sort == '-area' %}selected{% endif %}>المساحة الأكبر</option>
+          <option value="area" {% if sort == 'area' %}selected{% endif %}>المساحة الأصغر</option>
+          <option value="-views_count" {% if sort == '-views_count' %}selected{% endif %}>الأكثر مشاهدة</option>
+        </select>
+      </div>
+
+      <div class="col-12 d-flex gap-2 justify-content-end mt-3">
+        <a href="{% url 'search' %}" class="btn btn-secondary">🔄 مسح</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'save_search' %}?{{ request.GET.urlencode }}" class="btn btn-info">💾 حفظ هذا البحث</a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> بحث</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ══════ النتائج ══════ -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-light">عدد النتائج: <span class="text-warning">{{ total|default:properties.count }}</span></h4>
+  </div>
+
+  <div class="row g-3">
+    {% for p in properties %}
+    <div class="col-md-4">
+      <a href="{% url 'detail' p.pk %}" class="text-decoration-none">
+        <div class="prop-card">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" class="prop-card-img">
+          {% else %}
+            <div class="prop-card-img-ph">🏠</div>
+          {% endif %}
+          <div class="prop-card-body">
+            <h5 class="prop-card-title">{{ p.title|truncatechars:35 }}</h5>
+            <p class="prop-card-loc"><i class="bi bi-geo-alt-fill"></i> {{ p.city }}</p>
+            <p class="prop-card-details">🛏 {{ p.rooms }} غرف · 📐 {{ p.area }} م² · {{ p.get_property_type_display }}</p>
+            <div class="prop-card-footer">
+              <span class="prop-card-price">{{ p.price|floatformat:0 }} ل.س</span>
+              <span class="prop-card-rating">⭐ {{ p.avg_rating }}</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h4>لا توجد نتائج</h4>
+        <p>جرّب تغيير معايير البحث</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+.search-card{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;color:#E8E8EC}
+.search-card .form-label{color:#C9A84C;font-size:0.85rem;font-weight:600}
+.search-card .form-control,.search-card .form-select{background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:#E8E8EC;border-radius:8px}
+.search-card .form-control:focus,.search-card .form-select:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,0.15)}
+.prop-card{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;transition:all .25s;height:100%}
+.prop-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.prop-card-img,.prop-card-img-ph{width:100%;height:180px;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:50px;color:#5A5A66;background:rgba(0,0,0,0.2)}
+.prop-card-body{padding:16px}
+.prop-card-title{color:#FFF;font-weight:700;font-size:1rem;margin-bottom:8px}
+.prop-card-loc{color:#8A8A96;font-size:0.85rem;margin-bottom:6px}
+.prop-card-details{color:#C0C0CC;font-size:0.8rem;margin-bottom:12px}
+.prop-card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)}
+.prop-card-price{color:#C9A84C;font-weight:800;font-size:1.05rem}
+.prop-card-rating{color:#E8C96A;font-size:0.9rem;font-weight:600}
+.empty-state{text-align:center;padding:60px 20px;color:#8A8A96}
+.empty-icon{font-size:5rem;margin-bottom:20px;opacity:0.5}
+.page-title{color:#C9A84C;font-weight:800}
+</style>
+{% endblock %}

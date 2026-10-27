@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="page-title mb-4">compare.html</h2>
+  <div class="card-custom p-4">
+    {% if form %}<form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary">حفظ</button></form>{% endif %}
+
+    {% if following %}{% for f in following %}<a href="{% url 'owner_profile' f.followed.username %}" class="d-block py-2">{{ f.followed.username }}</a>{% endfor %}{% endif %}
+    {% if followers %}{% for f in followers %}<a href="{% url 'owner_profile' f.follower.username %}" class="d-block py-2">{{ f.follower.username }}</a>{% endfor %}{% endif %}
+    {% if searches %}{% for s in searches %}<div class="py-2 d-flex justify-content-between"><a href="{% url 'search' %}?q={{ s.query }}&city={{ s.city }}">{{ s.name }}</a><a class="btn btn-sm btn-danger" href="{% url 'delete_search' s.pk %}">حذف</a></div>{% endfor %}{% endif %}
+    {% if notifications %}{% for n in notifications %}<div class="py-2 {% if not n.is_read %}fw-bold{% endif %}"><a href="{% url 'mark_notification_read' n.pk %}">{{ n.message }}</a><small class="text-muted d-block">{{ n.created_at|timesince }}</small></div>{% endfor %}{% endif %}
+    {% if items %}{% for it in items %}<a href="{% url 'detail' it.property.pk %}" class="d-block py-2">{{ it.property.title }} <small class="text-muted">— {{ it.viewed_at|timesince }}</small></a>{% endfor %}{% endif %}
+    {% if properties %}<div class="row g-3">{% for p in properties %}<div class="col-md-4"><div class="card-custom p-3"><h5>{{ p.title }}</h5><p>{{ p.city }} · {{ p.price|floatformat:0 }} ل.س</p><p>{{ p.rooms }} غرف · {{ p.area }} م² · {{ p.get_property_type_display }}</p></div></div>{% endfor %}</div>{% endif %}
+  </div>
+</div>
+<style>.card-custom{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:14px;color:#E8E8EC}</style>
+{% endblock %}

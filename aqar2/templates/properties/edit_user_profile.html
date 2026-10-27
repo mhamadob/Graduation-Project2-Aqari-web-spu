@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}الملف الموسَّع — عقار{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <div class="form-card">
+    <h2 class="form-title">📝 الملف الشخصي الموسَّع</h2>
+    <p class="text-muted mb-4">أكمل بيانات ملفك ليظهر للزوار بشكل احترافي</p>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small class="text-muted">{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<small class="text-danger">{{ field.errors|first }}</small>{% endif %}
+      </div>
+      {% endfor %}
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'profile' %}" class="btn btn-secondary">إلغاء</a>
+        <button type="submit" class="btn btn-primary">💾 حفظ بيانات الملف</button>
+      </div>
+    </form>
+  </div>
+</div>
+<style>
+.form-card{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:32px;color:#E8E8EC;max-width:680px;margin:0 auto}
+.form-title{color:#C9A84C;font-weight:800;margin:0 0 8px}
+.form-card .form-label{color:#C9A84C;font-weight:600}
+.form-card input,.form-card textarea,.form-card select{background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:#E8E8EC;border-radius:8px;padding:10px 14px;width:100%}
+.form-card input:focus,.form-card textarea:focus,.form-card select:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,0.15);outline:none}
+</style>
+{% endblock %}

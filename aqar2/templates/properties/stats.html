@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}الإحصائيات{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="page-title mb-4">📊 إحصائيات الموقع</h1>
+  <div class="row g-3">
+    <div class="col-md-4"><div class="stat-card-big"><div class="lbl">إجمالي العقارات</div><div class="val">{{ stats.total_properties }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card-big"><div class="lbl">المستخدمون</div><div class="val">{{ stats.total_users }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card-big"><div class="lbl">المدن</div><div class="val">{{ stats.total_cities }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card-big"><div class="lbl">التقييمات</div><div class="val">{{ stats.total_ratings }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card-big"><div class="lbl">إجمالي المشاهدات</div><div class="val">{{ stats.total_views }}</div></div></div>
+    <div class="col-md-4"><div class="stat-card-big"><div class="lbl">متوسط التقييم</div><div class="val">{{ stats.avg_rating|floatformat:1 }} / 5</div></div></div>
+  </div>
+
+  {% if stats.most_viewed %}
+  <div class="mt-5">
+    <h3 class="mb-3">🔥 العقار الأكثر مشاهدة</h3>
+    <div class="card-custom p-4">
+      <h4>{{ stats.most_viewed.title }}</h4>
+      <p class="text-muted">{{ stats.most_viewed.city }} · {{ stats.most_viewed.views_count }} مشاهدة</p>
+      <a href="{% url 'detail' stats.most_viewed.pk %}" class="btn btn-primary">عرض التفاصيل</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="mt-5">
+    <h3 class="mb-3">📈 التوزيع حسب النوع</h3>
+    <div class="row g-3">
+    {% for t in stats.by_type %}
+      <div class="col-md-3"><div class="stat-card-big"><div class="lbl">{{ t.property_type }}</div><div class="val">{{ t.c }}</div></div></div>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+<style>
+.stat-card-big{background:linear-gradient(135deg,#1A1F2B,#252A38);padding:24px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);text-align:center}
+.stat-card-big .lbl{color:#8A8A96;font-size:0.85rem;margin-bottom:8px}
+.stat-card-big .val{color:#C9A84C;font-size:2.4rem;font-weight:800}
+.card-custom{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:14px}
+</style>
+{% endblock %}

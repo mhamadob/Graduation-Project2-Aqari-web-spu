@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% block title %}{{ property.title }} — عقار{% endblock %}
+{% block content %}
+<div class="container py-4">
+
+  <!-- ════════ بطاقة العقار الرئيسية ════════ -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      {% if property.image %}
+        <img src="{{ property.image.url }}" class="property-hero-img w-100" alt="{{ property.title }}">
+      {% else %}
+        <div class="property-hero-placeholder">🏠</div>
+      {% endif %}
+
+      <!-- صور إضافية - FR-11 -->
+      {% if property.images.all %}
+      <div class="row g-2 mt-2">
+        {% for img in property.images.all %}
+        <div class="col-3">
+          <img src="{{ img.image.url }}" class="img-thumb-gallery">
+          {% if user == property.owner %}
+            <a href="{% url 'delete_property_image' img.id %}" class="btn-img-delete" title="حذف الصورة">×</a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+      <div class="detail-info-card">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h2 class="prop-title">{{ property.title }}</h2>
+          <span class="badge badge-{{ property.status }}">
+            {% if property.status == 'sale' %}🏷️ للبيع{% else %}🔑 للإيجار{% endif %}
+          </span>
+        </div>
+
+        <p class="prop-location"><i class="bi bi-geo-alt-fill"></i> {{ property.city }} — {{ property.address }}</p>
+        <p class="prop-price-big">{{ property.price|floatformat:0 }} ل.س</p>
+
+        <!-- شارات الخصائص -->
+        <div class="prop-features-row">
+          <div class="feature-pill">🛏️ {{ property.rooms }} غرف</div>
+          <div class="feature-pill">📐 {{ property.area }} م²</div>
+          <div class="feature-pill">🏘️ {{ property.get_property_type_display }}</div>
+        </div>
+
+        <!-- FR-17, FR-32, FR-34, FR-35 — الإحصائيات -->
+        <div class="prop-stats">
+          <div class="stat-item">
+            <div class="stat-icon">⭐</div>
+            <div>
+              <div class="stat-value">{{ property.avg_rating }}/5</div>
+              <div class="stat-label">المتوسط الحسابي · {{ property.ratings_count }} تقييم</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">👁</div>
+            <div>
+              <div class="stat-value">{{ property.views_count }}</div>
+              <div class="stat-label">مشاهدة</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">❤️</div>
+            <div>
+              <div class="stat-value">{{ property.favorites_count }}</div>
+              <div class="stat-label">مفضلة</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- صاحب العقار + زر متابعة -->
+        <div class="owner-strip">
+          <a href="{% url 'owner_profile' property.owner.username %}" class="owner-link">
+            <div class="owner-avatar-mini">{{ property.owner.username|first|upper }}</div>
+            <div>
+              <div class="owner-name">{{ property.owner.username }}</div>
+              <div class="owner-sub">صاحب الإعلان</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- FR-29, FR-30, FR-58 — أزرار التفاعل -->
+        {% if user.is_authenticated and user != property.owner %}
+          <div class="action-buttons">
+            {% if is_favorite %}
+              <a href="{% url 'fav_remove' property.pk %}" class="btn-action btn-fav-on">
+                ❤️ إزالة من المفضلة
+              </a>
+            {% else %}
+              <a href="{% url 'fav_add' property.pk %}" class="btn-action btn-fav-off">
+                🤍 أضف للمفضلة
+              </a>
+            {% endif %}
+            <a href="{% url 'report' property.pk %}" class="btn-action btn-report">
+              ⚠️ إبلاغ
+            </a>
+          </div>
+        {% endif %}
+
+        <!-- أزرار المالك - FR-13, 14, 15, 16 -->
+        {% if user == property.owner %}
+          <div class="owner-actions mt-3">
+            <a href="{% url 'edit' property.pk %}" class="btn btn-warning btn-sm">✏️ تعديل</a>
+            <form method="post" action="{% url 'toggle_property' property.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-{% if property.is_active %}secondary{% else %}success{% endif %} btn-sm">
+                {% if property.is_active %}⏸️ تعطيل{% else %}▶️ تفعيل{% endif %}
+              </button>
+            </form>
+            {% if property.ad_state != 'draft' %}
+            <a href="{% url 'save_as_draft' property.pk %}" class="btn btn-info btn-sm">📝 حفظ كمسودة</a>
+            {% endif %}
+            <a href="{% url 'delete_property' property.pk %}" class="btn btn-danger btn-sm">🗑️ حذف</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ الوصف ════════ -->
+  <div class="card-block">
+    <h3 class="section-title">📝 وصف العقار</h3>
+    <p class="prop-description">{{ property.description|linebreaks }}</p>
+  </div>
+
+  <!-- ════════ FR-33, 36 — التقييم ════════ -->
+  {% if user.is_authenticated and user != property.owner %}
+  <div class="card-block">
+    <h3 class="section-title">⭐ قيِّم هذا العقار</h3>
+    {% if user_rating %}
+      <p class="text-muted">تقييمك السابق: {{ user_rating.score }}/5 — يمكنك تغييره</p>
+    {% endif %}
+    <form method="post" action="{% url 'rate' property.pk %}" class="rating-form">
+      {% csrf_token %}
+      <div class="rating-stars">
+        {% for i in "12345" %}
+        <button type="submit" name="score" value="{{ i }}" class="star-btn">
+          {% if user_rating and user_rating.score >= forloop.counter %}⭐{% else %}☆{% endif %}
+          <span class="star-num">{{ i }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- ════════ FR-37, 38, 39 — التعليقات ════════ -->
+  <div class="card-block">
+    <h3 class="section-title">💬 التعليقات ({{ comments|length }})</h3>
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'add_comment' property.pk %}" class="comment-form mb-4">
+      {% csrf_token %}
+      <textarea name="text" rows="3" class="form-control" placeholder="اكتب تعليقك..." required></textarea>
+      <button type="submit" class="btn btn-primary mt-2">💬 نشر التعليق</button>
+    </form>
+    {% else %}
+      <p class="alert alert-info">يرجى <a href="{% url 'login' %}">تسجيل الدخول</a> للتعليق</p>
+    {% endif %}
+
+    {% for comment in comments %}
+    <div class="comment-block">
+      <div class="comment-header">
+        <div class="comment-avatar">{{ comment.user.username|first|upper }}</div>
+        <div class="flex-grow-1">
+          <strong>{{ comment.user.username }}</strong>
+          <small class="text-muted ms-2">{{ comment.created_at|timesince }} مضت</small>
+        </div>
+        {% if user == comment.user or user == property.owner %}
+          <a href="{% url 'delete_comment' comment.id %}" class="btn-delete-comment" title="حذف">🗑️</a>
+        {% endif %}
+      </div>
+      <p class="comment-text">{{ comment.text }}</p>
+
+      <!-- FR-38: زر الرد -->
+      {% if user.is_authenticated %}
+      <details class="comment-reply">
+        <summary class="reply-toggle">💬 رد</summary>
+        <form method="post" action="{% url 'add_comment' property.pk %}" class="mt-2">
+          {% csrf_token %}
+          <input type="hidden" name="parent_id" value="{{ comment.id }}">
+          <textarea name="text" rows="2" class="form-control" placeholder="اكتب ردك..." required></textarea>
+          <button type="submit" class="btn btn-sm btn-primary mt-2">إرسال</button>
+        </form>
+      </details>
+      {% endif %}
+
+      <!-- الردود -->
+      {% for reply in comment.replies.all %}
+      <div class="comment-reply-block">
+        <div class="comment-header">
+          <div class="comment-avatar small">{{ reply.user.username|first|upper }}</div>
+          <div class="flex-grow-1">
+            <strong>{{ reply.user.username }}</strong>
+            <small class="text-muted ms-2">{{ reply.created_at|timesince }} مضت</small>
+          </div>
+          {% if user == reply.user or user == property.owner %}
+            <a href="{% url 'delete_comment' reply.id %}" class="btn-delete-comment" title="حذف">🗑️</a>
+          {% endif %}
+        </div>
+        <p class="comment-text">{{ reply.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% empty %}
+    <p class="text-muted text-center py-3">— لا توجد تعليقات بعد —</p>
+    {% endfor %}
+  </div>
+
+  <!-- ════════ FR-18 — عقارات أخرى للمالك ════════ -->
+  {% if other_properties %}
+  <div class="card-block">
+    <h3 class="section-title">🏠 عقارات أخرى من نفس المالك</h3>
+    <div class="row g-3">
+      {% for p in other_properties %}
+      <div class="col-md-3">
+        <a href="{% url 'detail' p.pk %}" class="text-decoration-none">
+          <div class="mini-prop-card">
+            {% if p.image %}<img src="{{ p.image.url }}" class="mini-prop-img">{% endif %}
+            <div class="mini-prop-body">
+              <div class="mini-prop-title">{{ p.title|truncatechars:25 }}</div>
+              <div class="mini-prop-meta">{{ p.city }} · {{ p.price|floatformat:0 }} ل.س</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+.property-hero-img,.property-hero-placeholder{border-radius:16px;height:420px;object-fit:cover;background:linear-gradient(135deg,#1A1F2B,#252A38);display:flex;align-items:center;justify-content:center;font-size:80px;color:#5A5A66}
+.img-thumb-gallery{width:100%;height:90px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.06)}
+.btn-img-delete{position:absolute;top:-6px;left:-6px;background:#FF5A5F;color:white !important;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:700;line-height:1}
+.detail-info-card{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;color:#E8E8EC}
+.prop-title{color:#FFF;font-size:1.6rem;font-weight:800;margin:0}
+.prop-location{color:#8A8A96;margin:8px 0 12px}
+.prop-price-big{color:#C9A84C;font-size:2rem;font-weight:800;margin-bottom:16px}
+.badge-sale{background:rgba(74,158,255,0.15);color:#4A9EFF;border:1px solid rgba(74,158,255,0.3);padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700}
+.badge-rent{background:rgba(232,201,106,0.15);color:#E8C96A;border:1px solid rgba(232,201,106,0.3);padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700}
+.prop-features-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.feature-pill{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:6px 14px;border-radius:20px;font-size:0.85rem;color:#E8E8EC}
+.prop-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);margin:16px 0}
+.stat-item{display:flex;align-items:center;gap:8px}
+.stat-icon{font-size:1.4rem}
+.stat-value{font-size:1rem;font-weight:800;color:#FFF;line-height:1}
+.stat-label{font-size:0.7rem;color:#8A8A96;margin-top:2px}
+.owner-strip{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:16px}
+.owner-link{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}
+.owner-avatar-mini{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#E8C96A);color:#1A1F2B;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem}
+.owner-name{font-weight:700;color:#FFF}
+.owner-sub{font-size:0.78rem;color:#8A8A96}
+.action-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.btn-action{flex:1;padding:12px;border-radius:10px;text-align:center;font-weight:700;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-size:0.9rem}
+.btn-fav-on{background:linear-gradient(135deg,#FF5A5F,#FC642D);color:#FFF !important}
+.btn-fav-off{background:rgba(255,255,255,0.06);color:#E8E8EC !important;border:1px solid rgba(255,255,255,0.1) !important}
+.btn-fav-off:hover{background:rgba(255,255,255,0.1)}
+.btn-report{background:rgba(255,90,95,0.1);color:#FF5A5F !important;border:1px solid rgba(255,90,95,0.3)}
+.owner-actions{display:flex;gap:6px;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)}
+.card-block{background:linear-gradient(135deg,#1A1F2B,#252A38);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;margin-bottom:18px;color:#E8E8EC}
+.section-title{color:#C9A84C;font-size:1.1rem;font-weight:700;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.prop-description{color:#C0C0CC;line-height:1.8}
+.rating-form .rating-stars{display:flex;gap:10px;justify-content:center}
+.star-btn{background:transparent;border:none;font-size:2rem;cursor:pointer;color:#C9A84C;padding:0;position:relative}
+.star-btn:hover{transform:scale(1.2)}
+.star-num{display:block;font-size:0.7rem;color:#8A8A96;margin-top:-8px}
+.comment-form textarea{background:rgba(0,0,0,0.2) !important;border:1px solid rgba(255,255,255,0.1) !important;color:#E8E8EC !important;border-radius:10px;padding:12px}
+.comment-form textarea:focus{border-color:#C9A84C !important;box-shadow:0 0 0 3px rgba(201,168,76,0.15) !important}
+.comment-block{padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.comment-block:last-child{border-bottom:none}
+.comment-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.comment-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#4A9EFF,#00A699);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0}
+.comment-avatar.small{width:28px;height:28px;font-size:0.75rem}
+.comment-text{color:#C0C0CC;margin:0 0 0 46px;line-height:1.6}
+.btn-delete-comment{color:#FF5A5F;text-decoration:none;padding:4px 8px;border-radius:6px;transition:background .2s}
+.btn-delete-comment:hover{background:rgba(255,90,95,0.1)}
+.comment-reply{margin:8px 0 0 46px}
+.reply-toggle{color:#4A9EFF;cursor:pointer;font-size:0.85rem;padding:4px 0}
+.comment-reply-block{margin:12px 0 0 46px;padding:10px 14px;background:rgba(0,0,0,0.15);border-radius:10px}
+.mini-prop-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;transition:all .2s}
+.mini-prop-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.3)}
+.mini-prop-img{width:100%;height:120px;object-fit:cover}
+.mini-prop-body{padding:10px}
+.mini-prop-title{color:#FFF;font-weight:700;font-size:0.9rem;margin-bottom:4px}
+.mini-prop-meta{color:#8A8A96;font-size:0.75rem}
+</style>
+{% endblock %}
